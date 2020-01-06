@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+<!-- three.js library -->
+<script src='js/three/three.min.js'></script>
+<script src="https://threejs.org/examples/js/controls/OrbitControls.js" ></script>
+<script src='js/three/loaders/PDBLoader.js'></script>
+<script src="js/jquery-1.7.min.js"></script>
+
+<body style='margin : 0px; overflow: hidden; font-family: Monospace;'><div id='ThreeJS' style='position: absolute; top: 10px; width:100%; text-align: center; z-index: 1;'>
+    John Gibson
+</div><script>
+    //////////////////////////////////////////////////////////////////////////////////
+    //		Init
+    //////////////////////////////////////////////////////////////////////////////////
+
+    // Create an empty scene
+    var scene = new THREE.Scene();
+
+    // Create a basic perspective camera
+    var camera = new THREE.PerspectiveCamera( 35, window.innerWidth/window.innerHeight, 0.1, 1000 );
+
+    // Create a renderer with Antialiasing
+    var renderer = new THREE.WebGLRenderer({antialias:true});
+
+    var controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.update();
+
+    // Configure renderer clear color
+    // renderer.setClearColor("#000000");
+    renderer.setClearColor(0x808080);
+
+
+    // Configure renderer size
+    renderer.setSize( window.innerWidth, window.innerHeight );
+
+    // Append Renderer to DOM
+    document.body.appendChild( renderer.domElement );
+
+    function makeScene(id) {
+        // instantiate a loader
+        var loader = new PDBLoader(id.substr(4), scene, {scale: 2.5, aaScale: undefined, representation: "cartoon"});
+
+        function download(query) {
+            var baseURL = '';
+            if (query.substr(0, 4) == 'pdb:') {
+                query = query.substr(4).toUpperCase();
+                if (!query.match(/^[1-9][A-Za-z0-9]{3}$/)) {
+                    alert("Wrong PDB ID"); return;
+                }
+                uri = "http://www.pdb.org/pdb/files/" + query + ".pdb";
+            } else if (query.substr(0, 4) == 'cid:') {
+                query = query.substr(4);
+                if (!query.match(/^[1-9]+$/)) {
+                    alert("Wrong Compound ID"); return;
+                }
+                uri = "http://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/" + query +
+                    "/SDF?record_type=3d";
+            }
+            $.get(uri, function(ret) {
+                console.log("URI: " + uri);
+                loader.loadMolecule(ret);
+                camera.position.set(loader.x, loader.y, loader.z);
+                camera.translateOnAxis(camera.position, -4);
+                camera.lookAt(loader.x, loader.y, loader.z);
+            });
+        }
+
+        download(id);
+    }
+
+     makeScene('pdb:4N77');
+
+    // var sphereGeometry = new THREE.SphereGeometry(0.01, 16, 16); // r, seg, ring
+    // var material	= new THREE.MeshBasicMaterial({
+    //     transparent : true,
+    //     opacity: 0.75,
+    //     color: 0x156289
+    // });
+    // var mesh	= new THREE.Mesh( sphereGeometry, material );
+    // mesh.position.set(0, 0, 0);
+    // scene.add( mesh );
+    // camera.position.set(mesh.position.x, mesh.position.y, mesh.position.z);
+    // camera.translateZ(-10);
+    // camera.lookAt(mesh.position.x, mesh.position.y, mesh.position.z);
+
+    // Render Loop
+    var render = function () {
+        requestAnimationFrame( render );
+        controls.update();
+        // Render the scene
+        renderer.render(scene, camera);
+    };
+
+    render();
+
+
+
+</script></body>
