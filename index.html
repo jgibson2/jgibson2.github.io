@@ -18,21 +18,35 @@
 
     <!-- Overlay content -->
     <div class="overlay-content">
-        Protein: <input type="text" id="pdb_id" value="pdb:4N77">
-        Scale: <input type="number" id="scale" value="2.0" step=0.01>
-        Amino Acid Scale: <input type="number" id="aaScale" value="0.025" step=0.001>
-        Representation:
+        <p>Protein: <input type="text" id="pdb_id" value="pdb:4N77"></p>
+
+        <p>Scale: <input type="number" id="scale" value="2.0" step=0.01></p>
+
+        <p>Amino Acid Scale: <input type="number" id="aaScale" value="0.025" step=0.001></p>
+
+        <p>Representation:
         <select id="representation">
             <option value="cartoon">Cartoon</option>
             <option value="sphere">Sphere</option>
             <option value="mainchain">Main Chain</option>
-        </select>
+        </select></p>
+
+        <p>
+            <br>
+            To use, open <a href="https://upload.wikimedia.org/wikipedia/commons/4/48/Hiro_marker_ARjs.png">this marker</a> on another device (or print it out)
+        and point the camera at the marker.</p>
+
+        <p>
+            <br>
+            Use the above boxes to change the scale of the model, the scales of the amino acids / atoms, and the PDB shown. Any PDB on RSCB can be shown
+            by entering "pdb:[PDB CODE HERE]" into the Protein box.
+        </p>
     </div>
 
 </div>
 
 <!-- Use any element to open/show the overlay navigation menu -->
-<span onclick="openNav()" style='z-index: 99; position: absolute; display: block'>Menu</span>
+<span onclick="openNav()" style='z-index: 99; position: absolute; display: block; font-size: 300%'>Menu</span>
 
 <div style='position: absolute; top: 10px; width:100%; text-align: center; z-index: 1;'>
     AR Protein Visualizer: Inspired by GLmol and AR.js
