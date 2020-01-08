@@ -68,7 +68,7 @@ PDBLoader.prototype.create = function(id, scene, params) {
 	this.curveWidth = 0.3 * this.aaScale;
 	this.defaultColor = 0xCCCCCC;
 	this.sphereQuality = 16; //16;
-	this.cylinderQuality = 16; //8;
+	this.cylinderQuality = 12; //8;
 	this.axisDIV = 5; // 3 still gives acceptable quality
 	this.strandDIV = 6;
 	this.nucleicAcidStrandDIV = 4;
@@ -91,10 +91,11 @@ PDBLoader.prototype.create = function(id, scene, params) {
 
 PDBLoader.prototype.setupLights = function(scene) {
 	var directionalLight =  new THREE.DirectionalLight(0xFFFFFF);
-	directionalLight.position = new TV3(0.2, 0.2, -1).normalize();
+	directionalLight.position = new TV3(this.x, this.y, this.z).normalize();
 	directionalLight.intensity = 1.2;
 	scene.add(directionalLight);
 	var ambientLight = new THREE.AmbientLight(0xffffff);
+	ambientLight.intensity = 1.90;
 	scene.add(ambientLight);
 };
 
@@ -450,6 +451,9 @@ PDBLoader.prototype.parsePDB2 = function(str) {
 // Catmull-Rom subdivision
 PDBLoader.prototype.subdivide = function(_points, DIV) { // points as Vector3
 	var ret = [];
+	if(_points.length === 0){
+		return ret;
+	}
 	var points;
 	var i, j;
 	points = new Array(); // Smoothing test
@@ -492,7 +496,7 @@ PDBLoader.prototype.drawAtomsAsSphere = function(group, atomlist, defaultRadius,
 		var atom = this.atoms[atomlist[i]];
 		if (atom == undefined) continue;
 
-		var sphereMaterial = new THREE.MeshLambertMaterial({color: atom.color});
+		var sphereMaterial = new THREE.MeshPhongMaterial({color: atom.color});
 		var sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
 		group.add(sphere);
 		var r = (!forceDefault && this.vdwRadii[atom.elem] != undefined) ? this.vdwRadii[atom.elem] : defaultRadius;
@@ -512,7 +516,7 @@ PDBLoader.prototype.drawAtomsAsIcosahedron = function(group, atomlist, defaultRa
 		var atom = this.atoms[atomlist[i]];
 		if (atom == undefined) continue;
 
-		var mat = new THREE.MeshLambertMaterial({color: atom.color});
+		var mat = new THREE.MeshPhongMaterial({color: atom.color});
 		var sphere = new THREE.Mesh(geo, mat);
 		sphere.scale.x = sphere.scale.y = sphere.scale.z = (!forceDefault && this.vdwRadii[atom.elem] != undefined) ? this.vdwRadii[atom.elem] : defaultRadius;
 		group.add(sphere);
@@ -828,7 +832,7 @@ PDBLoader.prototype.drawSmoothTube = function(group, _points, colors, radii) {
 	}
 	geo.computeFaceNormals();
 	geo.computeVertexNormals(false);
-	var mat = new THREE.MeshLambertMaterial();
+	var mat = new THREE.MeshPhongMaterial();
 	mat.vertexColors = THREE.FaceColors;
 	var mesh = new THREE.Mesh(geo, mat);
 	mesh.doubleSided = true;
@@ -888,38 +892,37 @@ PDBLoader.prototype.drawMainchainTube = function(group, atomlist, atomName, radi
 };
 
 PDBLoader.prototype.drawStrip = function(group, p1, p2, colors, div) {
-	this.drawThinStrip(group, p1, p2, colors, div)
-};
-
-PDBLoader.prototype.drawThinStrip = function(group, p1, p2, colors, div) {
+	var p1s = this.subdivide(p1, div);
+	var p2s = this.subdivide(p2, div);
 	var geo = new THREE.Geometry();
+	var norm = new TV3(this.x, this.y, this.z);
 	var i;
-	for (i = 0, lim = p1.length; i < lim; i++) {
-		geo.vertices.push(p1[i]); // 2i
-		geo.vertices.push(p2[i]); // 2i + 1
+	for (i = 0, lim = p1s.length; i < lim; i++) {
+		geo.vertices.push(p1s[i]); // 2i
+		geo.vertices.push(p2s[i]); // 2i + 1
 	}
-	for (i = 1, lim = p1.length; i < lim; i++) {
-		// var f = new THREE.Face4(2 * i, 2 * i + 1, 2 * i - 1, 2 * i - 2);
-		// f.color = new TCo(colors[Math.round((i - 1)/ div)]);
-		// geo.faces.push(f);
-
-		// var f = new THREE.Face3(2 * i, 2 * i + 1, 2 * i - 1);
-		// f.color = new TCo(colors[Math.round((i - 1)/ div)]);
-		// geo.faces.push(f);
-		// f = new THREE.Face3(2 * i, 2 * i - 2 , 2 * i - 1);
-		// f.color = new TCo(colors[Math.round((i - 1)/ div)]);
-		// geo.faces.push(f);
-
-		var f = new THREE.Face3(2 * i, 2 * i + 1, 2 * i - 1);
+	for (i = 1, lim = p1s.length; i < lim; i++) {
+		var f;
+		f = new THREE.Face3(2 * i, 2 * i + 1, 2 * i - 1, norm);
 		f.color = new TCo(colors[Math.round((i - 1)/ div)]);
 		geo.faces.push(f);
-		f = new THREE.Face3(2 * i, 2 * i - 2 , 2 * i - 1);
+
+		f = new THREE.Face3(2 * i, 2 * i - 1, 2 * i + 1, norm);
+		f.color = new TCo(colors[Math.round((i - 1)/ div)]);
+		geo.faces.push(f);
+
+		f = new THREE.Face3(2 * i, 2 * i - 2 , 2 * i - 1, norm);
+		f.color = new TCo(colors[Math.round((i - 1)/ div)]);
+		geo.faces.push(f);
+
+		f = new THREE.Face3(2 * i, 2 * i - 1, 2 * i - 2, norm);
 		f.color = new TCo(colors[Math.round((i - 1)/ div)]);
 		geo.faces.push(f);
 	}
-	geo.computeFaceNormals();
+	geo.computeFaceNormals(false);
 	geo.computeVertexNormals(false);
-	var material =  new THREE.MeshLambertMaterial();
+	var material =  new THREE.MeshPhongMaterial();
+	material.side = THREE.DoubleSide;
 	material.vertexColors = THREE.FaceColors;
 	var mesh = new THREE.Mesh(geo, material);
 	mesh.doubleSided = true;
@@ -937,7 +940,10 @@ PDBLoader.prototype.drawCylinder = function(group, from, to, radius, color, cap)
 	var midpoint = new TV3().addVectors(from, new TV3().subVectors(to, from).multiplyScalar(0.5));
 
 	var cylinderGeometry = new THREE.CylinderGeometry(radius, radius, from.distanceTo(to), this.cylinderQuality, 1, !cap);
-	var cylinderMaterial = new THREE.MeshLambertMaterial({color: color});
+	var cylinderMaterial = new THREE.MeshPhongMaterial({color: color,
+		polygonOffset: true,
+		polygonOffsetFactor: 1, // positive value pushes polygon further away
+		polygonOffsetUnits: 1});
 	var cylinder = new THREE.Mesh(cylinderGeometry, cylinderMaterial);
 	cylinder.position.set(midpoint.x, midpoint.y, midpoint.z);
 	cylinder.lookAt(from);
@@ -947,6 +953,22 @@ PDBLoader.prototype.drawCylinder = function(group, from, to, radius, color, cap)
 	m.makeRotationX(Math.PI / 2);
 	cylinder.matrix.multiply(m);
 	group.add(cylinder);
+	// wireframe
+	var wireframeGeometry = new THREE.EdgesGeometry( cylinder.geometry ); // or WireframeGeometry
+	var wireframeMaterial = new THREE.LineDashedMaterial( {
+		color: color / 1.5,
+		linewidth: 0.5,
+		scale: 1,
+		dashSize: 3,
+		gapSize: 1,
+	} );
+	var wireframe = new THREE.LineSegments( wireframeGeometry, wireframeMaterial );
+	wireframe.position.set(midpoint.x, midpoint.y, midpoint.z);
+	wireframe.lookAt(from);
+	wireframe.updateMatrix();
+	wireframe.matrixAutoUpdate = false;
+	wireframe.matrix.multiply(m);
+	group.add( wireframe );
 };
 
 // FIXME: transition!
@@ -973,7 +995,7 @@ PDBLoader.prototype.drawHelixAsCylinder = function(group, atomlist, radius) {
 	}
 	if (start != null) this.drawCylinder(group, new TV3(start.x, start.y, start.z), new TV3(atom.x, atom.y, atom.z), radius, atom.color);
 	this.drawMainchainTube(group, others, "CA", this.coilWidth);
-	this.drawStrand(group, beta, 20, 4, false,  this.coilWidth, this.helixSheetWidth, false);
+	this.drawStrand(group, beta, 10, 8, true,  this.coilWidth, this.helixSheetWidth, false);
 
 };
 
@@ -1000,9 +1022,15 @@ PDBLoader.prototype.drawStrand = function(group, atomlist, num, div, fill, coilW
 		if ((atom.atom == 'O' || atom.atom == 'CA') && !atom.hetflag) {
 			if (atom.atom == 'CA') {
 				if (currentChain != atom.chain || currentResi + 1 != atom.resi) {
-					for (j = 0; !thickness && j < num; j++)
-						this.drawSmoothCurve(group, points[j], 100 ,colors, div);
-					if (fill) this.drawStrip(group, points[0], points[num - 1], colors, div);
+					for (j = 0; !fill && j < num; j++) {
+						// this.drawSmoothCurve(group, points[j], 100 ,colors, div);
+						this.drawSmoothCurve(group, points[j], 1, colors, div);
+					}
+					if (fill) {
+						this.drawStrip(group, points[0], points[num - 1], colors, div);
+						this.drawSmoothCurve(group, points[0], 1, Array(colors.length).fill(colors[0] / 2), div);
+						this.drawSmoothCurve(group, points[num - 1], 1, Array(colors.length).fill(colors[0] / 2), div);
+					}
 					var points = []; for (k = 0; k < num; k++) points[k] = [];
 					colors = [];
 					prevCO = null; ss = null; ssborder = false;
@@ -1029,9 +1057,15 @@ PDBLoader.prototype.drawStrand = function(group, atomlist, num, div, fill, coilW
 			}
 		}
 	}
-	for (i = 0; !thickness && i < num; i++)
-		this.drawSmoothCurve(group, points[i], 100 ,colors, div);
-	if (fill) this.drawStrip(group, points[0], points[num - 1], colors, div);
+	for (i = 0; !fill && i < num; i++) {
+		// this.drawSmoothCurve(group, points[i], 100 ,colors, div);
+		this.drawSmoothCurve(group, points[i], 1, colors, div);
+	}
+	if (fill) {
+		this.drawStrip(group, points[0], points[num - 1], colors, div);
+		this.drawSmoothCurve(group, points[0], 1, Array(colors.length).fill(colors[0] / 2), div);
+		this.drawSmoothCurve(group, points[num - 1], 1, Array(colors.length).fill(colors[0] / 2), div);
+	}
 };
 
 PDBLoader.prototype.drawNucleicAcidLadderSub = function(geo, lineGeo, atoms, color) {
@@ -1086,7 +1120,7 @@ PDBLoader.prototype.drawNucleicAcidLadder = function(group, atomlist) {
 	}
 	this.drawNucleicAcidLadderSub(geo, lineGeo, currentComponent, color);
 	geo.computeFaceNormals();
-	var mat = new THREE.MeshLambertMaterial();
+	var mat = new THREE.MeshPhongMaterial();
 	mat.vertexColors = THREE.VertexColors;
 	var mesh = new THREE.Mesh(geo, mat);
 	mesh.doubleSided = true;
@@ -1607,7 +1641,6 @@ PDBLoader.prototype.scaleAtoms = function(scale) {
 };
 
 PDBLoader.prototype.defineRepresentation = function() {
-	this.scaleAtoms(this.scale);
 	var all = this.getAllAtoms();
 	var hetatm = this.removeSolvents(this.getHetatms(all));
 	this.colorByAtom(all, {});
@@ -1623,14 +1656,16 @@ PDBLoader.prototype.defineRepresentation = function() {
 		this.drawMainchainCurve(this.scene, all, 50 * this.aaScale, 'CA');
 	}
 
+};
+
+PDBLoader.prototype.initializeScene = function() {
+	this.scaleAtoms(this.scale);
+
 	var defnAtoms = this.atoms.filter(e => e !== undefined);
 	this.x = defnAtoms.reduce((a,b) => a + b.x, 0) / defnAtoms.length;
 	this.y = defnAtoms.reduce((a,b) => a + b.y, 0) / defnAtoms.length;
 	this.z = defnAtoms.reduce((a,b) => a + b.z, 0) / defnAtoms.length;
 
-};
-
-PDBLoader.prototype.initializeScene = function() {
 	this.setupLights(this.scene);
 };
 
@@ -1659,6 +1694,6 @@ PDBLoader.prototype.loadMolecule = function(source) {
 	if (this.protein.title != '') titleStr += '<br>' + this.protein.title;
 	title.html(titleStr);
 
-	this.rebuildScene(true);
+	this.rebuildScene();
 };
 
