@@ -226,7 +226,14 @@
         download(id);
     }
 
-    makeScene('pdb:1BBY', {});
+    let url_string = window.location.href 
+    let url = new URL(url_string);
+    let id = url.searchParams.get("id");
+    console.log(id);
+    if(id == null) {
+        id = 'pdb:1BBY'
+    }
+    makeScene(id, {});
 
     //////////////////////////////////////////////////////////////////////////////////
     //		render the whole thing on the page

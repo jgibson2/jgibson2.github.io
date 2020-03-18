@@ -68,7 +68,14 @@
         download(id);
     }
 
-     makeScene('pdb:4N77');
+    let url_string = window.location.href 
+    let url = new URL(url_string);
+    let id = url.searchParams.get("id");
+    console.log(id);
+    if(id == null) {
+        id = 'pdb:1BBY'
+    }
+    makeScene(id, {});
 
     // var sphereGeometry = new THREE.SphereGeometry(0.01, 16, 16); // r, seg, ring
     // var material	= new THREE.MeshBasicMaterial({
