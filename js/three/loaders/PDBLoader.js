@@ -48,7 +48,7 @@ function PDBLoader(id, scene, params){
 
 PDBLoader.prototype.create = function(id, scene, params) {
 	this.Nucleotides = ['  G', '  A', '  T', '  C', '  U', ' DG', ' DA', ' DT', ' DC', ' DU'];
-	this.ElementColors = {"H": 0xCCCCCC, "C": 0xAAAAAA, "O": 0xCC0000, "N": 0x0000CC, "S": 0xCCCC00, "P": 0x6622CC,
+	this.ElementColors = {"H": 0xCCCCCC, "C": 0x000000, "O": 0xCC0000, "N": 0x0000CC, "S": 0xCCCC00, "P": 0x6622CC,
 		"F": 0x00CC00, "CL": 0x00CC00, "BR": 0x882200, "I": 0x6600AA,
 		"FE": 0xCC6600, "CA": 0x8888AA};
 // Reference: A. Bondi, J. Phys. Chem., 1964, 68, 441.
