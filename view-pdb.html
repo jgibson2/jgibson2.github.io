@@ -36,9 +36,9 @@
     // Append Renderer to DOM
     document.body.appendChild( renderer.domElement );
 
-    function makeScene(id) {
+    function makeScene(id, params) {
         // instantiate a loader
-        var loader = new PDBLoader(id.substr(4), scene, {scale: 2.5, aaScale: undefined, representation: "cartoon"});
+        var loader = new PDBLoader(id.substr(4), scene, params);
 
         function download(query) {
             var baseURL = '';
@@ -71,11 +71,16 @@
     let url_string = window.location.href 
     let url = new URL(url_string);
     let id = url.searchParams.get("id");
+    let repr = url.searchParams.get("repr");
     console.log(id);
     if(id == null) {
         id = 'pdb:1BBY'
     }
-    makeScene(id, {});
+    console.log(repr);
+    if(repr == null) {
+        repr = undefined
+    }
+    makeScene(id, {representation: repr, scale: 2.5, aaScale: undefined});
 
     // var sphereGeometry = new THREE.SphereGeometry(0.01, 16, 16); // r, seg, ring
     // var material	= new THREE.MeshBasicMaterial({

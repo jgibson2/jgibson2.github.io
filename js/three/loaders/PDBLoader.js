@@ -1,4 +1,5 @@
 var TV3 = THREE.Vector3, TF3 = THREE.Face3, TCo = THREE.Color;
+var DRAW_BONDS_ATOM_LIMIT = 200
 
 /* Calculates and stores the HSL components of this HSVColour so that they can
  * be returned be the getHSL function.
@@ -1650,8 +1651,11 @@ PDBLoader.prototype.defineRepresentation = function() {
 		this.drawAtomsAsSphere(this.scene, hetatm, this.sphereRadius, false, this.aaScale);
 		this.colorByStructure(all, 0xff00ff, 0x00ffff, false);
 		this.drawHelixAsCylinder(this.scene, all, this.cylinderRadius);
-	} else if (this.representation === "sphere"){
+	} else if (this.representation === "sphere") {
 		this.drawAtomsAsSphere(this.scene, all, this.sphereRadius, false, this.aaScale);
+        if(all.length < DRAW_BONDS_ATOM_LIMIT) {
+            this.drawBondsAsStick(this.scene, all, this.sphereRadius / 10, this.sphereRadius, true, true, this.aaScale)
+        }
 	} else if(this.representation === "mainchain") {
 		this.drawMainchainCurve(this.scene, all, 50 * this.aaScale, 'CA');
 	}

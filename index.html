@@ -229,11 +229,16 @@
     let url_string = window.location.href 
     let url = new URL(url_string);
     let id = url.searchParams.get("id");
+    let repr = url.searchParams.get("repr");
     console.log(id);
     if(id == null) {
         id = 'pdb:1BBY'
     }
-    makeScene(id, {});
+    console.log(repr);
+    if(repr == null) {
+        repr = undefined
+    }
+    makeScene(id, {representation: repr});
 
     //////////////////////////////////////////////////////////////////////////////////
     //		render the whole thing on the page
