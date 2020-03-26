@@ -1,12 +1,48 @@
 <!DOCTYPE html>
 <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+<link rel="stylesheet" href="ar-pdb.css">
 <!-- three.js library -->
 <script src='js/three/three.min.js'></script>
 <script src="https://threejs.org/examples/js/controls/OrbitControls.js" ></script>
 <script src='js/three/loaders/PDBLoader.js'></script>
 <script src="js/jquery-1.7.min.js"></script>
 
-<body style='margin : 0px; overflow: hidden; font-family: Monospace;'><div id='ThreeJS' style='position: absolute; top: 10px; width:100%; text-align: center; z-index: 1;'>
+<body style='margin : 0px; overflow: hidden; font-family: Monospace;'>
+
+<body style='margin : 0px; overflow: hidden; font-family: Monospace;'>
+
+<div id="myNav" class="overlay">
+
+    <!-- Button to close the overlay navigation -->
+    <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+
+    <!-- Overlay content -->
+    <div class="overlay-content">
+        <p>Protein: <input type="text" id="pdb_id" value="pdb:4N77"></p>
+
+        <p>Scale: <input type="number" id="scale" value="2.0" step=0.01></p>
+
+        <p>Amino Acid Scale: <input type="number" id="aaScale" value="0.025" step=0.001></p>
+
+        <p>Representation:
+        <select id="representation">
+            <option value="cartoon">Cartoon</option>
+            <option value="sphere">Sphere</option>
+            <option value="mainchain">Main Chain</option>
+        </select></p>
+
+            <br>
+            Use the above boxes to change the scale of the model, the scales of the amino acids / atoms, and the PDB shown. Any PDB on RSCB can be shown
+            by entering "pdb:[PDB CODE HERE]" into the Protein box.
+        </p>
+    </div>
+
+</div>
+
+<!-- Use any element to open/show the overlay navigation menu -->
+<span onclick="openNav()" style='z-index: 99; position: absolute; display: block; font-size: 300%'>Menu</span>
+
+<div id='ThreeJS' style='position: absolute; top: 10px; width:100%; text-align: center; z-index: 1;'>
     John Gibson
 </div><script>
     //////////////////////////////////////////////////////////////////////////////////
@@ -35,6 +71,37 @@
 
     // Append Renderer to DOM
     document.body.appendChild( renderer.domElement );
+
+    function clearThree(obj){
+        scene = new THREE.Scene();
+        scene.add(camera);
+        onRenderFcts = [];
+        onRenderFcts.push(function(){
+            if( arToolkitSource.ready === false )	return
+
+            arToolkitContext.update( arToolkitSource.domElement )
+
+            // update scene.visible if the marker is seen
+            scene.visible = camera.visible
+        });
+        onRenderFcts.push(function(){
+            renderer.render( scene, camera );
+        });
+    }
+
+    function openNav() {
+        document.getElementById("myNav").style.width = "100%";
+    }
+
+    /* Close when someone clicks on the "x" symbol inside the overlay */
+    function closeNav() {
+        document.getElementById("myNav").style.width = "0%";
+        clearThree(scene);
+        makeScene(document.getElementById("pdb_id").value,
+            {scale: document.getElementById("scale").value,
+            aaScale: document.getElementById("aaScale").value,
+            representation: document.getElementById("representation").value});
+    }
 
     function makeScene(id, params) {
         // instantiate a loader
