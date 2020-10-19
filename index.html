@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <head>
 <meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, user-scalable=no">
+<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 <link rel="stylesheet" href="ar-pdb.css">
 <!-- three.js library -->
 <script type="module" src="js/main.js"></script>
@@ -73,6 +73,12 @@ $(window).on("load", function(){
             repr = {representation: "cartoon"}
         }
         ar = new ARPDBRenderer();
+	ar.arToolkitSource.init(function onReady(){
+		ar.resize();
+	});
+    	window.addEventListener('resize', function(){
+		ar.resize();
+    	});
         ar.clearThree();
         ar.makeScene(id, repr);
         let dl = url.searchParams.get("dl");

@@ -17,14 +17,14 @@ class ARPDBRenderer {
             let w = window.innerWidth;
             let h = window.innerHeight;
             this.renderer.setClearColor(new THREE.Color('lightgrey'), 0)
-            this.renderer.setSize( h, w );
+            this.renderer.setSize(480, 640);
             this.renderer.domElement.style.position = 'absolute'
             this.renderer.domElement.style.top = '0px'
             this.renderer.domElement.style.left = '0px'
             document.body.appendChild( this.renderer.domElement );
 
             // array of functions for the rendering loop
-            this.onRenderFcts= [];
+            this.onRenderFcts = [];
 
             // init scene and camera
             this.scene  = new THREE.Scene();
@@ -73,9 +73,7 @@ class ARPDBRenderer {
             // update artoolkit on every frame
             this.onRenderFcts.push(function() {
                 if( ar.arToolkitSource.ready === false ) {return;}
-
                 ar.arToolkitContext.update( ar.arToolkitSource.domElement )
-
                 // update scene.visible if the marker is seen
                 ar.scene.visible = ar.camera.visible
             });
@@ -106,7 +104,11 @@ class ARPDBRenderer {
             window.addEventListener('resize', function(){
                 ar.resize();
             })
-
+            
+	    // render the scene
+            this.onRenderFcts.push(function(){
+                ar.renderer.render( ar.scene, ar.camera );
+            });
         }
 
         clearThree(){
@@ -116,9 +118,7 @@ class ARPDBRenderer {
             let ar = this;
             this.onRenderFcts.push(function(){
                 if( ar.arToolkitSource.ready === false ) { return; }
-
                 ar.arToolkitContext.update( ar.arToolkitSource.domElement )
-
                 // update scene.visible if the marker is seen
                 ar.scene.visible = ar.camera.visible
             });
@@ -166,11 +166,6 @@ class ARPDBRenderer {
             //          render the whole thing on the page
             //////////////////////////////////////////////////////////////////////////////////
 	    let ar = this;
-            // render the scene
-            this.onRenderFcts.push(function(){
-                ar.renderer.render( ar.scene, ar.camera );
-            });
-
 
             // run the rendering loop
             var lastTimeMsec = null;
@@ -185,8 +180,6 @@ class ARPDBRenderer {
                 ar.onRenderFcts.forEach(function(onRenderFct){
                     onRenderFct(deltaMsec/1000, nowMsec/1000)
                 });
-		// HOLY HACK BATMAN (but I can't figure out why this breaks????)
-		ar.resize();
             });
         }
 
