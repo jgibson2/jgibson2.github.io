@@ -17,7 +17,7 @@ class ARPDBRenderer {
             let w = window.innerWidth;
             let h = window.innerHeight;
             this.renderer.setClearColor(new THREE.Color('lightgrey'), 0)
-            this.renderer.setSize( w, h );
+            this.renderer.setSize( h, w );
             this.renderer.domElement.style.position = 'absolute'
             this.renderer.domElement.style.top = '0px'
             this.renderer.domElement.style.left = '0px'
@@ -40,33 +40,17 @@ class ARPDBRenderer {
             ////////////////////////////////////////////////////////////////////////////////
             //          handle arToolkitSource
             ////////////////////////////////////////////////////////////////////////////////
-
             this.arToolkitSource = new THREEx.ArToolkitSource({
                 // to read from the webcam
                 sourceType : 'webcam',
-
-                // // to read from an image
-                // sourceType : 'image',
-                // sourceUrl : THREEx.ArToolkitContext.baseURL + '../data/images/img.jpg',
-
-                // to read from a video
-                // sourceType : 'video',
-                // sourceUrl : THREEx.ArToolkitContext.baseURL + '../data/videos/headtracking.mp4',
-                displayWidth: w,
-                displayHeight: h
+		sourceWidth: this.renderer.getSize().y,
+		sourceHeight: this.renderer.getSize().x,
+                displayWidth: this.renderer.getSize().y,
+                displayHeight: this.renderer.getSize().x
             })
 
 
             let ar = this;
-            this.arToolkitSource.init(function onReady(){
-                ar.resize();
-            })
-
-            // handle resize
-            window.addEventListener('resize', function(){
-                ar.resize();
-            })
-
 
             ////////////////////////////////////////////////////////////////////////////////
             //          initialize arToolkitContext
@@ -77,8 +61,8 @@ class ARPDBRenderer {
             this.arToolkitContext = new THREEx.ArToolkitContext({
                 cameraParametersUrl: THREEx.ArToolkitContext.baseURL + '../data/data/camera_para.dat',
                 detectionMode: 'mono',
-                canvasHeight: h,
-                canvasWidth: w
+                canvasHeight: this.renderer.getSize().x,
+                canvasWidth: this.renderer.getSize().y
             })
             // initialize it
             this.arToolkitContext.init(function onCompleted(){
@@ -87,7 +71,7 @@ class ARPDBRenderer {
             })
 
             // update artoolkit on every frame
-            this.onRenderFcts.push(function(){
+            this.onRenderFcts.push(function() {
                 if( ar.arToolkitSource.ready === false ) {return;}
 
                 ar.arToolkitContext.update( ar.arToolkitSource.domElement )
@@ -113,35 +97,16 @@ class ARPDBRenderer {
             
             this.id = id;
             this.params = params;
-            // this.makeScene(this.id, this.params);
             
+            this.arToolkitSource.init(function onReady(){
+                ar.resize();
+            })
+            
+	    // handle resize
+            window.addEventListener('resize', function(){
+                ar.resize();
+            })
 
-            //////////////////////////////////////////////////////////////////////////////////
-            //          render the whole thing on the page
-            //////////////////////////////////////////////////////////////////////////////////
-
-            // render the scene
-            this.onRenderFcts.push(function(){
-                ar.renderer.render( ar.scene, ar.camera );
-            });
-
-            // start in correct size
-            this.resize();
-
-            // run the rendering loop
-            var lastTimeMsec = null;
-            requestAnimationFrame(function animate(nowMsec){
-                // keep looping
-                requestAnimationFrame( animate );
-                // measure time
-                lastTimeMsec    = lastTimeMsec || nowMsec-1000/60
-                var deltaMsec   = Math.min(200, nowMsec - lastTimeMsec)
-                lastTimeMsec    = nowMsec
-                // call each update function
-                ar.onRenderFcts.forEach(function(onRenderFct){
-                    onRenderFct(deltaMsec/1000, nowMsec/1000)
-                })
-            });
         }
 
         clearThree(){
@@ -160,8 +125,6 @@ class ARPDBRenderer {
             this.onRenderFcts.push(function(){
                 ar.renderer.render( ar.scene, ar.camera );
             });
-            // start in correct size
-            this.resize();
         }
 
 
@@ -198,7 +161,33 @@ class ARPDBRenderer {
             }
 
             download(id);
-            this.resize();
+            
+	    //////////////////////////////////////////////////////////////////////////////////
+            //          render the whole thing on the page
+            //////////////////////////////////////////////////////////////////////////////////
+	    let ar = this;
+            // render the scene
+            this.onRenderFcts.push(function(){
+                ar.renderer.render( ar.scene, ar.camera );
+            });
+
+
+            // run the rendering loop
+            var lastTimeMsec = null;
+            requestAnimationFrame(function animate(nowMsec){
+                // keep looping
+                requestAnimationFrame( animate );
+                // measure time
+                lastTimeMsec    = lastTimeMsec || nowMsec-1000/60
+                var deltaMsec   = Math.min(200, nowMsec - lastTimeMsec)
+                lastTimeMsec    = nowMsec
+                // call each update function
+                ar.onRenderFcts.forEach(function(onRenderFct){
+                    onRenderFct(deltaMsec/1000, nowMsec/1000)
+                });
+		// HOLY HACK BATMAN (but I can't figure out why this breaks????)
+		ar.resize();
+            });
         }
 
         downloadGLTF() {
@@ -237,7 +226,7 @@ class ARPDBRenderer {
         }
 
     resize() {
-        //this.arToolkitSource.onResizeElement();
+        this.arToolkitSource.onResizeElement();
         this.arToolkitSource.copyElementSizeTo(this.renderer.domElement)
         if( this.arToolkitContext.arController !== null ){
             this.arToolkitSource.copyElementSizeTo(this.arToolkitContext.arController.canvas)
