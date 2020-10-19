@@ -1,24 +1,25 @@
 <!DOCTYPE html>
-<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, user-scalable=no">
 <link rel="stylesheet" href="ar-pdb.css">
 <!-- three.js library -->
-<script src='js/three/three.min.js'></script>
-<script src='js/three/loaders/PDBLoader.js'></script>
+<script type="module" src="js/main.js"></script>
 <!-- ar.js -->
-<script src="js/ar.min.js"></script>
+<script src="https://unpkg.com/three@0.121.0/build/three.min.js"></script>
+<script src="https://raw.githack.com/AR-js-org/AR.js/master/three.js/build/ar.js"></script>
 <script src="js/jquery-1.7.min.js"></script>
-<script>THREEx.ArToolkitContext.baseURL = 'js/'</script>
-
+</head>
 <body style='margin : 0px; overflow: hidden; font-family: Monospace;'>
 
 <div id="myNav" class="overlay">
 
     <!-- Button to close the overlay navigation -->
-    <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+    <a id="closeMenuBtn" href="javascript:void(0)" class="closebtn">&times;</a>
 
     <!-- Overlay content -->
     <div class="overlay-content">
-        <p>Protein: <input type="text" id="pdb_id" value="pdb:4N77"></p>
+        <p>Protein: <input type="text" id="pdb_id" value="pdb:1BBY"></p>
 
         <p>Scale: <input type="number" id="scale" value="2.0" step=0.01></p>
 
@@ -46,221 +47,66 @@
 </div>
 
 <!-- Use any element to open/show the overlay navigation menu -->
-<span onclick="openNav()" style='z-index: 99; position: absolute; display: block; font-size: 300%'>Menu</span>
+<span id="openMenuBtn" style='z-index: 99; position: absolute; display: block; font-size: 300%'>Menu</span>
 
 <div style='position: absolute; top: 10px; width:100%; text-align: center; z-index: 1;'>
     AR Protein Visualizer: Inspired by GLmol and AR.js
     John Gibson
+    <br>
+    <span id="clickToDownload">Click to download model</span>
 </div>
-<script>
-    /* Open when someone clicks on the span element */
 
-    //////////////////////////////////////////////////////////////////////////////////
-    //		Init
-    //////////////////////////////////////////////////////////////////////////////////
-
-    // init renderer
-    var renderer	= new THREE.WebGLRenderer({
-        antialias: true,
-        alpha: true
-    });
-    renderer.setClearColor(new THREE.Color('lightgrey'), 0)
-    renderer.setSize( 640, 480 );
-    renderer.domElement.style.position = 'absolute'
-    renderer.domElement.style.top = '0px'
-    renderer.domElement.style.left = '0px'
-    document.body.appendChild( renderer.domElement );
-
-    // array of functions for the rendering loop
-    var onRenderFcts= [];
-
-    // init scene and camera
-    var scene	= new THREE.Scene();
-
-    //////////////////////////////////////////////////////////////////////////////////
-    //		Initialize a basic camera
-    //////////////////////////////////////////////////////////////////////////////////
-
-    // Create a camera
-    var camera = new THREE.Camera();
-    scene.add(camera);
-
-    ////////////////////////////////////////////////////////////////////////////////
-    //          handle arToolkitSource
-    ////////////////////////////////////////////////////////////////////////////////
-
-    var arToolkitSource = new THREEx.ArToolkitSource({
-        // to read from the webcam
-        sourceType : 'webcam',
-
-        // // to read from an image
-        // sourceType : 'image',
-        // sourceUrl : THREEx.ArToolkitContext.baseURL + '../data/images/img.jpg',
-
-        // to read from a video
-        // sourceType : 'video',
-        // sourceUrl : THREEx.ArToolkitContext.baseURL + '../data/videos/headtracking.mp4',
-    })
-
-    arToolkitSource.init(function onReady(){
-        onResize()
-    })
-
-    // handle resize
-    window.addEventListener('resize', function(){
-        onResize()
-    })
-    function onResize(){
-        arToolkitSource.onResizeElement()
-        arToolkitSource.copyElementSizeTo(renderer.domElement)
-        if( arToolkitContext.arController !== null ){
-            arToolkitSource.copyElementSizeTo(arToolkitContext.arController.canvas)
+<script type="module">
+import { ARPDBRenderer } from './js/main.js' 
+var ar = null;
+$(window).on("load", function(){
+        let url_string = window.location.href 
+        let url = new URL(url_string);
+        let id = url.searchParams.get("id");
+        let repr = url.searchParams.get("repr");
+        console.log(id);
+        if(id === null) {
+            id = 'pdb:1BBY'
         }
-    }
-    ////////////////////////////////////////////////////////////////////////////////
-    //          initialize arToolkitContext
-    ////////////////////////////////////////////////////////////////////////////////
-
-
-    // create atToolkitContext
-    var arToolkitContext = new THREEx.ArToolkitContext({
-        cameraParametersUrl: THREEx.ArToolkitContext.baseURL + '../data/data/camera_para.dat',
-        detectionMode: 'mono',
-    })
-    // initialize it
-    arToolkitContext.init(function onCompleted(){
-        // copy projection matrix to camera
-        camera.projectionMatrix.copy( arToolkitContext.getProjectionMatrix() );
-    })
-
-    // update artoolkit on every frame
-    onRenderFcts.push(function(){
-        if( arToolkitSource.ready === false )	return
-
-        arToolkitContext.update( arToolkitSource.domElement )
-
-        // update scene.visible if the marker is seen
-        scene.visible = camera.visible
-    });
-
-    ////////////////////////////////////////////////////////////////////////////////
-    //          Create a ArMarkerControls
-    ////////////////////////////////////////////////////////////////////////////////
-
-    // init controls for camera
-    var markerControls = new THREEx.ArMarkerControls(arToolkitContext, camera, {
-        type : 'pattern',
-        patternUrl : THREEx.ArToolkitContext.baseURL + '../data/data/patt.hiro',
-        // patternUrl : THREEx.ArToolkitContext.baseURL + '../data/data/patt.kanji',
-        // as we controls the camera, set changeMatrixMode: 'cameraTransformMatrix'
-        changeMatrixMode: 'cameraTransformMatrix'
-    })
-    // as we do changeMatrixMode: 'cameraTransformMatrix', start with invisible scene
-    scene.visible = false;
-
-
-    function clearThree(obj){
-        scene = new THREE.Scene();
-        scene.add(camera);
-        onRenderFcts = [];
-        onRenderFcts.push(function(){
-            if( arToolkitSource.ready === false )	return
-
-            arToolkitContext.update( arToolkitSource.domElement )
-
-            // update scene.visible if the marker is seen
-            scene.visible = camera.visible
-        });
-        onRenderFcts.push(function(){
-            renderer.render( scene, camera );
-        });
-    }
-
-    function openNav() {
-        document.getElementById("myNav").style.width = "100%";
-    }
-
-    /* Close when someone clicks on the "x" symbol inside the overlay */
-    function closeNav() {
-        document.getElementById("myNav").style.width = "0%";
-        clearThree(scene);
-        makeScene(document.getElementById("pdb_id").value,
-            {scale: document.getElementById("scale").value,
-            aaScale: document.getElementById("aaScale").value,
-            representation: document.getElementById("representation").value});
-    }
-
-    //////////////////////////////////////////////////////////////////////////////////
-    //		add an object in the scene
-    //////////////////////////////////////////////////////////////////////////////////
-
-
-
-    function makeScene(id, params) {
-        // instantiate a loader
-        var loader = new PDBLoader(id.substr(4), scene, params);
-
-        function download(query) {
-            var baseURL = '';
-            if (query.substr(0, 4) == 'pdb:') {
-                query = query.substr(4).toUpperCase();
-                if (!query.match(/^[1-9][A-Za-z0-9]{3}$/)) {
-                    alert("Wrong PDB ID"); return;
-                }
-                // uri = "https://www.pdb.org/pdb/files/" + query + ".pdb";
-                uri = "https://files.rcsb.org/download/" + query + ".pdb";
-            } else if (query.substr(0, 4) == 'cid:') {
-                query = query.substr(4);
-                if (!query.match(/^[1-9]+$/)) {
-                    alert("Wrong Compound ID"); return;
-                }
-                uri = "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/" + query +
-                    "/SDF?record_type=3d";
-            }
-            $.get(uri, function(ret) {
-                console.log("URI: " + uri);
-                loader.loadMolecule(ret);
-            });
+        console.log(repr);
+        if(repr === null) {
+            repr = {representation: "cartoon"}
         }
+        ar = new ARPDBRenderer();
+        ar.clearThree();
+        ar.makeScene(id, repr);
+        let dl = url.searchParams.get("dl");
+        if(dl === "1") {
+                ar.downloadGLTF();
+        }
+        $("#clickToDownload").click(() => {
+                ar.downloadGLTF();
+        });
 
-        download(id);
-    }
+        $("#openMenuBtn").click(() => {
+                openNav();
+        });
 
-    let url_string = window.location.href 
-    let url = new URL(url_string);
-    let id = url.searchParams.get("id");
-    let repr = url.searchParams.get("repr");
-    console.log(id);
-    if(id == null) {
-        id = 'pdb:1BBY'
-    }
-    console.log(repr);
-    if(repr == null) {
-        repr = undefined
-    }
-    makeScene(id, {representation: repr});
+        $("#closeMenuBtn").click(() => {
+                closeNav();
+        });
+        $(window).trigger('resize');
+        window.dispatchEvent(new Event('resize'));
+});
 
-    //////////////////////////////////////////////////////////////////////////////////
-    //		render the whole thing on the page
-    //////////////////////////////////////////////////////////////////////////////////
+function openNav() {
+    document.getElementById("myNav").style.width = "100%";
+}
 
-    // render the scene
-    onRenderFcts.push(function(){
-        renderer.render( scene, camera );
-    });
-
-    // run the rendering loop
-    var lastTimeMsec = null;
-    requestAnimationFrame(function animate(nowMsec){
-        // keep looping
-        requestAnimationFrame( animate );
-        // measure time
-        lastTimeMsec	= lastTimeMsec || nowMsec-1000/60
-        var deltaMsec	= Math.min(200, nowMsec - lastTimeMsec)
-        lastTimeMsec	= nowMsec
-        // call each update function
-        onRenderFcts.forEach(function(onRenderFct){
-            onRenderFct(deltaMsec/1000, nowMsec/1000)
-        })
-    })
-</script></body>
+/* Close when someone clicks on the "x" symbol inside the overlay */
+function closeNav() {
+    document.getElementById("myNav").style.width = "0%";
+    ar.clearThree();
+    ar.makeScene(document.getElementById("pdb_id").value,
+        {scale: document.getElementById("scale").value,
+        aaScale: document.getElementById("aaScale").value,
+        representation: document.getElementById("representation").value});
+}
+</script>
+</body>
+</html>

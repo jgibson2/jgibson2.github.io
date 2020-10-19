@@ -1,3 +1,4 @@
+import * as THREE from 'https://unpkg.com/three@0.121.0/build/three.module.js';
 var TV3 = THREE.Vector3, TF3 = THREE.Face3, TCo = THREE.Color;
 var DRAW_BONDS_ATOM_LIMIT = 200
 
@@ -91,8 +92,8 @@ PDBLoader.prototype.create = function(id, scene, params) {
 }
 
 PDBLoader.prototype.setupLights = function(scene) {
-	var directionalLight =  new THREE.DirectionalLight(0xFFFFFF);
-	directionalLight.position = new TV3(this.x, this.y, this.z).normalize();
+	let directionalLight =  new THREE.DirectionalLight(0xFFFFFF);
+	directionalLight.position.set(new TV3(this.x, this.y, this.z).normalize());
 	directionalLight.intensity = 1.2;
 	scene.add(directionalLight);
 	var ambientLight = new THREE.AmbientLight(0xffffff);
@@ -325,9 +326,9 @@ PDBLoader.prototype.parsePDB2 = function(str) {
 	var i, j;
 
 	var atoms_cnt = 0;
-	lines = str.split("\n");
+	let lines = str.split("\n");
 	for (i = 0; i < lines.length; i++) {
-		line = lines[i].replace(/^\s*/, ''); // remove indent
+		let line = lines[i].replace(/^\s*/, ''); // remove indent
 		var recordName = line.substr(0, 6);
 		if (recordName == 'ATOM  ' || recordName == 'HETATM') {
 			var atom, resn, chain, resi, x, y, z, hetflag, elem, serial, altLoc, b;
@@ -456,7 +457,7 @@ PDBLoader.prototype.subdivide = function(_points, DIV) { // points as Vector3
 		return ret;
 	}
 	var points;
-	var i, j;
+	var i, j, lim, size;
 	points = new Array(); // Smoothing test
 	points.push(_points[0]);
 	for (i = 1, lim = _points.length - 1; i < lim; i++) {
@@ -772,7 +773,7 @@ PDBLoader.prototype.drawAsCross = function(group, atomlist, delta) {
 // FIXME: Winkled...
 PDBLoader.prototype.drawSmoothTube = function(group, _points, colors, radii) {
 	if (_points.length < 2) return;
-	var i, j;
+	var i, j, lim;
 
 	var circleDiv = this.tubeDIV, axisDiv = this.axisDIV;
 	var geo = new THREE.Geometry();
@@ -897,7 +898,7 @@ PDBLoader.prototype.drawStrip = function(group, p1, p2, colors, div) {
 	var p2s = this.subdivide(p2, div);
 	var geo = new THREE.Geometry();
 	var norm = new TV3(this.x, this.y, this.z);
-	var i;
+	var i, lim;
 	for (i = 0, lim = p1s.length; i < lim; i++) {
 		geo.vertices.push(p1s[i]); // 2i
 		geo.vertices.push(p2s[i]); // 2i + 1
@@ -1675,7 +1676,7 @@ PDBLoader.prototype.initializeScene = function() {
 
 
 PDBLoader.prototype.rebuildScene = function() {
-	time = new Date();
+	let time = new Date();
 
 	this.initializeScene();
 	this.defineRepresentation();
@@ -1701,3 +1702,4 @@ PDBLoader.prototype.loadMolecule = function(source) {
 	this.rebuildScene();
 };
 
+export { PDBLoader };
