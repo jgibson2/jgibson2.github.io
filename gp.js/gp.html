@@ -1,0 +1,79 @@
+<html lang="en">
+
+<head>
+<meta charset="UTF-8">
+<!-- CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
+<link rel="stylesheet" href="gp.css">
+
+<!-- jQuery and JS bundle w/ Popper.js -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/7.5.1/math.min.js"></script>
+<script src="https://d3js.org/d3.v6.min.js"></script>
+<script src="https://cdn.plot.ly/plotly-latest.min.js" charset="utf-8"></script>
+<script src="https://cdn.jsdelivr.net/npm/fmin@0.0.2/build/fmin.min.js"></script>
+<script src="gp.js"></script>
+<script src="plotgp.js"></script>
+</head>
+
+<body>
+<div id="chart"></div>
+<div class="container">
+  <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#options" aria-expanded="false" aria-controls="options">
+    Options
+  </button>
+</div>
+<div class="container collapse" id="options">
+  <div class="card card-body">
+        <div class="form-group">
+          <label for="function">Function</label>
+          <input type="text" class="form-control" aria-describedby="functionHelp" id="function" value="cos(x)">
+          <small id="functionHelp" class="form-text text-muted">f(x)</small>
+          <label for="step">Steps</label>
+          <input type="number" class="form-control" aria-describedby="stepHelp" id="steps", value=100>
+          <small id="uxlimHelp" class="form-text text-muted">Steps of x</small>
+        </div>
+	<button id="submitBtn" class="btn btn-primary">Go</button>
+  </div>
+</div>
+
+<script>
+	var tX = []; var tY = [];
+	var f = math.compile($('#function').val());
+	var lx = -1.0;
+	var ux = 1.0;
+	var step = (ux - lx) / $('#steps').val();
+
+	var X = math.range(lx, ux, step);
+	var gp = { mean : x => 0, kernel : Matern32, sigma: 0.0001 };
+	Plotly.newPlot('chart');
+	let chart = document.getElementById('chart');
+	chart.on('plotly_click', ev => {
+		let xs = ev.points.map(p => p.x).filter(x => x);
+		tX = tX.concat(xs);
+		tY = tY.concat(xs.map(n => f.evaluate({x : n})));
+		gp.xData = math.matrix(tX);
+		gp.yData = math.matrix(tY);
+		plotGP(gp, X, ExpectedImprovement);
+	});
+	chart.on('plotly_relayout', ev => {
+		lx = ev['xaxis.range[0]'];
+		ux = ev['xaxis.range[1]'];
+		step = (ux - lx) / $('#steps').val();
+		X = math.range(lx, ux, step);
+		plotGP(gp, X, ExpectedImprovement);
+	});
+	$('#submitBtn').click(() => {
+		tX = []; tY = [];
+		f = math.compile($('#function').val());
+		step = (ux - lx) / $('#steps').val();
+		X = math.range(lx, ux, step);
+		$('#options').collapse();
+		plotGP(gp, X);
+	});
+	plotGP(gp, X);
+</script>
+</body>
+
+</html>
