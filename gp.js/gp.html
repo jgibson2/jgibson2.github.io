@@ -96,7 +96,7 @@
 		ux = ev['xaxis.range[1]'];
 		step = (ux - lx) / $('#steps').val();
 		X = math.range(lx, ux, step);
-		plotGP(gp, X, ExpectedImprovement);
+		plotGP(gp, X, tX.length > 0 ? ExpectedImprovement : null);
 	});
 	$('#submitBtn').click(() => {
 		tX = []; tY = [];
