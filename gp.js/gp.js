@@ -57,6 +57,15 @@ function gaussianCDF(x, mean=0.0, variance=1.0) {
 	return 0.5 * erfc(-(x - mean) / (math.sqrt(variance) * Math.sqrt(2)));
 }
 
+function sampleGaussian(mean,std){
+	const _2PI = Math.PI * 2;
+	var u1 = Math.random();
+	var u2 = Math.random();
+	var z0 = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(_2PI * u2);
+	// var z1 = Math.sqrt(-2.0 * Math.log(u1)) * Math.sin(_2PI * u2);
+	return z0 * std + mean;
+}
+
 
 function SE(x, x2, l = 1.0, s = 1.0) {
 	return (s**2) * math.exp(-1 * math.norm(x - x2) / (2*(l**2)));

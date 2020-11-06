@@ -30,7 +30,23 @@
           <label for="function">Function</label>
           <input type="text" class="form-control" aria-describedby="functionHelp" id="function" value="cos(x)">
           <small id="functionHelp" class="form-text text-muted">f(x)</small>
-          <label for="step">Steps</label>
+	  <label for="kernel">Kernel</label>
+          <select class="form-control" id="kernel">
+            <option selected value="SE">Squared Exponential</option>
+            <option value="Matern12">Matern 1/2</option>
+            <option value="Matern32">Matern 3/2</option>
+            <option value="Matern52">Matern 5/2</option>
+            <option value="RQ1">Rational Quadratic (&alpha;=1.0)</option>
+            <option value="RQ5">Rational Quadratic (&alpha;=5.0)</option>
+          </select>
+	  <div>
+	    <label for="sigma">Sigma</label>
+	    <div>
+	      <input type="range" class="custom-range w-75" min=0.0 max=2.0 id="sigma" step=0.01>
+	      <span class="font-weight-bold text-primary ml-2 valueSpan2"></span>
+	    </div>
+	  </div>
+	  <label for="step">Steps</label>
           <input type="number" class="form-control" aria-describedby="stepHelp" id="steps", value=100>
           <small id="uxlimHelp" class="form-text text-muted">Steps of x</small>
         </div>
@@ -39,6 +55,23 @@
 </div>
 
 <script>
+	const $valueSpan = $('.valueSpan2');
+	const $value = $('#sigma');
+	$valueSpan.html($value.val());
+	$value.on('input change', () => {
+		$valueSpan.html($value.val());
+	});
+
+	var kernelMap = {
+		SE: SE,
+		Matern12: Matern12,
+		Matern32: Matern32,
+		Matern52: Matern52,
+		RQ1: RQ,
+		RQ5: (x, x2) => RQ(x, x2, 5.0)
+	};
+	var sigma = parseFloat($('#sigma').val()) + 1e-5;
+	var kern = kernelMap[$('#kernel').find("option:selected").val()];
 	var tX = []; var tY = [];
 	var f = math.compile($('#function').val());
 	var lx = -1.0;
@@ -46,13 +79,14 @@
 	var step = (ux - lx) / $('#steps').val();
 
 	var X = math.range(lx, ux, step);
-	var gp = { mean : x => 0, kernel : Matern32, sigma: 0.0001 };
+	var gp = { mean : x => 0, kernel : kern, sigma: sigma };
+
 	Plotly.newPlot('chart');
 	let chart = document.getElementById('chart');
 	chart.on('plotly_click', ev => {
 		let xs = ev.points.map(p => p.x).filter(x => x);
 		tX = tX.concat(xs);
-		tY = tY.concat(xs.map(n => f.evaluate({x : n})));
+		tY = tY.concat(xs.map(n => f.evaluate({x : n}) + sampleGaussian(0.0, sigma)));
 		gp.xData = math.matrix(tX);
 		gp.yData = math.matrix(tY);
 		plotGP(gp, X, ExpectedImprovement);
@@ -66,11 +100,16 @@
 	});
 	$('#submitBtn').click(() => {
 		tX = []; tY = [];
+		kern = kernelMap[$('#kernel').find("option:selected").val()];
+		sigma = parseFloat($('#sigma').val()) + 1e-5;
 		f = math.compile($('#function').val());
+		lx = -1.0;
+		ux = 1.0;
 		step = (ux - lx) / $('#steps').val();
 		X = math.range(lx, ux, step);
-		$('#options').collapse();
+		gp = { mean : x => 0, kernel : kern, sigma: sigma };
 		plotGP(gp, X);
+		$('#options').collapse();
 	});
 	plotGP(gp, X);
 </script>
