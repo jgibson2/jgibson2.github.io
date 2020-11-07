@@ -1,4 +1,4 @@
-function plotGP(gp, X, acquisitionFunction=null, elem='chart', color='#AB63FA') {
+function plotGP(gp, X, acquisitionFunction=null, plotAcquisitionFn=false, elem='chart', color='#AB63FA', acFnColor='#32CD32') {
 	let pred = predict(gp, X);
 	let Xdata = [];
 	math.map(X, e => Xdata.push(e));
@@ -40,6 +40,19 @@ function plotGP(gp, X, acquisitionFunction=null, elem='chart', color='#AB63FA') 
 			}
 			return e;
 		});
+		if(plotAcquisitionFn) {
+			let acdata = [];
+			math.map(EI, e => acdata.push(e));
+			data.push({
+				x: Xdata,
+				y: acdata,
+				yaxis: 'y2',
+				mode: 'lines',
+				name: 'Acquisition Function',
+				fill: 'tozeroy',
+				line : { color: acFnColor }
+			});
+		}
 		data.push({
 			x: [xMax],
 			y: [0.0],
@@ -47,7 +60,7 @@ function plotGP(gp, X, acquisitionFunction=null, elem='chart', color='#AB63FA') 
 			marker: {
 				color: 'black',
 				size: 25,
-				symbol: 'arrow-down'
+				symbol: 'arrow-up'
 			},
 			name: 'Proposed next point'
 		});
@@ -56,6 +69,7 @@ function plotGP(gp, X, acquisitionFunction=null, elem='chart', color='#AB63FA') 
 	  paper_bgcolor: "rgb(255,255,255)", 
 	  plot_bgcolor: "rgb(229,229,229)", 
 	  xaxis: {
+	    
 	    gridcolor: "rgb(255,255,255)", 
 	    showgrid: true, 
 	    showline: false, 
@@ -63,8 +77,17 @@ function plotGP(gp, X, acquisitionFunction=null, elem='chart', color='#AB63FA') 
 	    tickcolor: "rgb(127,127,127)", 
 	    ticks: "outside", 
 	    zeroline: false
-	  }, 
+	  },
+	  yaxis2: {
+	    domain: [0, 0.1],
+	    showgrid: false,
+	    zeroline: false,
+	    showticklabels: true, 
+	    tickcolor: "rgb(127,127,127)", 
+	    ticks: "outside", 
+	  },
 	  yaxis: {
+	    domain: [0.2, 1.0],
 	    gridcolor: "rgb(255,255,255)", 
 	    showgrid: true, 
 	    showline: false, 
@@ -75,5 +98,4 @@ function plotGP(gp, X, acquisitionFunction=null, elem='chart', color='#AB63FA') 
 	  }
 	};
 	Plotly.react(elem, data, layout);
-
 }

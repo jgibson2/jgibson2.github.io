@@ -18,7 +18,8 @@
 </head>
 
 <body>
-<div id="chart"></div>
+<div id="gp"></div>
+<div id="ac"></div>
 <div class="container">
   <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#options" aria-expanded="false" aria-controls="options">
     Options
@@ -38,6 +39,12 @@
             <option value="Matern52">Matern 5/2</option>
             <option value="RQ1">Rational Quadratic (&alpha;=1.0)</option>
             <option value="RQ5">Rational Quadratic (&alpha;=5.0)</option>
+          </select>
+	  <label for="acFn">Acquisition Function</label>
+          <select class="form-control" id="acFn">
+            <option selected value="EI">Expected Improvement</option>
+            <option value="KG">Knowledge Gradient</option>
+            <option value="UCB">Upper Confidence Bound (&beta;=0.5)</option>
           </select>
 	  <div>
 	    <label for="sigma">Sigma</label>
@@ -70,8 +77,15 @@
 		RQ1: RQ,
 		RQ5: (x, x2) => RQ(x, x2, 5.0)
 	};
+	var acquisitionFnMap = {
+		EI: ExpectedImprovement,
+		KG: KnowledgeGradient,
+		UCB: UpperConfidenceBound
+	};
+	
 	var sigma = parseFloat($('#sigma').val()) + 1e-5;
 	var kern = kernelMap[$('#kernel').find("option:selected").val()];
+	var acFn = acquisitionFnMap[$('#acFn').find("option:selected").val()];
 	var tX = []; var tY = [];
 	var f = math.compile($('#function').val());
 	var lx = -1.0;
@@ -81,26 +95,27 @@
 	var X = math.range(lx, ux, step);
 	var gp = { mean : x => 0, kernel : kern, sigma: sigma };
 
-	Plotly.newPlot('chart');
-	let chart = document.getElementById('chart');
+	Plotly.newPlot('gp');
+	let chart = document.getElementById('gp');
 	chart.on('plotly_click', ev => {
 		let xs = ev.points.map(p => p.x).filter(x => x);
 		tX = tX.concat(xs);
 		tY = tY.concat(xs.map(n => f.evaluate({x : n}) + sampleGaussian(0.0, sigma)));
 		gp.xData = math.matrix(tX);
 		gp.yData = math.matrix(tY);
-		plotGP(gp, X, ExpectedImprovement);
+		plotGP(gp, X, acFn, true, elem='gp');
 	});
 	chart.on('plotly_relayout', ev => {
 		lx = ev['xaxis.range[0]'];
 		ux = ev['xaxis.range[1]'];
 		step = (ux - lx) / $('#steps').val();
 		X = math.range(lx, ux, step);
-		plotGP(gp, X, tX.length > 0 ? ExpectedImprovement : null);
+		plotGP(gp, X, tX.length > 0 ? acFn : null, tX.length > 0, elem='gp');
 	});
 	$('#submitBtn').click(() => {
 		tX = []; tY = [];
 		kern = kernelMap[$('#kernel').find("option:selected").val()];
+		acFn = acquisitionFnMap[$('#acFn').find("option:selected").val()];
 		sigma = parseFloat($('#sigma').val()) + 1e-5;
 		f = math.compile($('#function').val());
 		lx = -1.0;
@@ -108,10 +123,10 @@
 		step = (ux - lx) / $('#steps').val();
 		X = math.range(lx, ux, step);
 		gp = { mean : x => 0, kernel : kern, sigma: sigma };
-		plotGP(gp, X);
+		plotGP(gp, X, null, false, elem='gp');
 		$('#options').collapse();
 	});
-	plotGP(gp, X);
+	plotGP(gp, X, null, false, elem='gp');
 </script>
 </body>
 

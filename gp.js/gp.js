@@ -121,13 +121,50 @@ function predict(gp, X) {
 }
 
 function ExpectedImprovement(gp, X, eta=0.01) {
-	let bestY = math.max(gp.yData);
-	let i = [...Array(gp.yData.size()[0]).keys()].filter(y => bestY == math.subset(gp.yData, math.index(y)))[0];
-	let bestPhi = predict(gp, [math.subset(gp.xData, math.index(i))]).mean[0];
+	if(gp.yData != null) {
+		let bestY = math.max(gp.yData);
+		let i = [...Array(gp.yData.size()[0]).keys()].filter(y => bestY == math.subset(gp.yData, math.index(y)))[0];
+		let bestPhi = predict(gp, [math.subset(gp.xData, math.index(i))]).mean[0];
 
+		let predX = predict(gp, X);
+		let r = math.subtract(predX.mean, bestPhi + eta);
+		let Z = math.dotDivide(r, math.add(predX.std, 1e-8))
+		let EI = math.add(math.dotMultiply(r, Z.map(x => gaussianCDF(x))), math.dotMultiply(predX.std, Z.map(x => gaussianPDF(x))));
+		return EI;
+	} else {
+		let predX = predict(gp, X);
+		let r = math.subtract(predX.mean, eta);
+		let Z = math.dotDivide(r, math.add(predX.std, 1e-8))
+		let EI = math.add(math.dotMultiply(r, Z.map(x => gaussianCDF(x))), math.dotMultiply(predX.std, Z.map(x => gaussianPDF(x))));
+		return EI;
+	}
+
+}
+
+function KnowledgeGradient(gp, X, eta=0.01) {
+	if(gp.yData != null) {
+		let bestY = math.max(gp.yData);
+		let i = [...Array(gp.yData.size()[0]).keys()].filter(y => bestY == math.subset(gp.yData, math.index(y)))[0];
+		let bestPhi = predict(gp, [math.subset(gp.xData, math.index(i))]).mean[0];
+
+		let predX = predict(gp, X);
+		let r = math.subtract(predX.mean, bestPhi + eta);
+		let Z = math.dotDivide(r, math.add(predX.std, 1e-8))
+		let EI = math.add(math.dotMultiply(r, Z.map(x => gaussianCDF(x))), math.dotMultiply(predX.std, Z.map(x => gaussianPDF(x))));
+		EI = math.subtract(EI, math.max(math.subtract(predX.mean, bestPhi), 0));
+		return EI;	
+	} else {
+		let predX = predict(gp, X);
+		let r = math.subtract(predX.mean, eta);
+		let Z = math.dotDivide(r, math.add(predX.std, 1e-8))
+		let EI = math.add(math.dotMultiply(r, Z.map(x => gaussianCDF(x))), math.dotMultiply(predX.std, Z.map(x => gaussianPDF(x))));
+		EI = math.subtract(EI, math.max(predX.mean, 0));
+		return EI;
+	}
+}
+
+function UpperConfidenceBound(gp, X, beta=0.5) {
 	let predX = predict(gp, X);
-	let r = math.subtract(predX.mean, bestPhi + eta);
-	let Z = math.dotDivide(r, math.add(predX.std, 1e-8))
-	let EI = math.add(math.dotMultiply(r, Z.map(x => gaussianCDF(x))), math.dotMultiply(predX.std, Z.map(x => gaussianPDF(x))));
-	return EI;	
+	let UCB = math.add(predX.mean, math.dotMultiply(math.sqrt(beta), predX.std));
+	return UCB;	
 }
