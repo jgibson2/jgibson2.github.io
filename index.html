@@ -3,39 +3,11 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8">
-	<link rel="stylesheet" href="https://classes.engineering.wustl.edu/cse330/content/weather.css">
-        <title id="bd_title"> Weather </title>
     </head>
     <body>
-	<div class="weather" id="weatherWidget" style="width: 250px;">
-		<div class="weather-loc"></div>
-		<div class="weather-humidity"></div>
-		<div class="weather-temp"></div>
-		<img class="weather-tomorrow" />
-		<img class="weather-dayaftertomorrow" />
-	</div>
-	<button id="refresh">Refresh</button>
+	    This is my webpage. More to come.
+	    <p><a href="proteins/index.html">AR Protein Viewer</a></p>
+	    <p><a href="report/index.html">Renewable Energy Recommendation Report</a></p>
+	    <p><a href="gp.js/gp.html">Bayesian Optimization Demo</a></p>
     </body>
 </html>
-
-<script>
-function fetchWeather() {
-	var xhttp = new XMLHttpRequest();
-	xhttp.onload = ()  => {
-		if (xhttp.status == 200) {
-			let data = JSON.parse(xhttp.responseText);
-			Array.from(document.getElementById("weatherWidget").getElementsByClassName("weather-loc")).forEach(e => e.innerHTML=`<strong>${data['location']['city']}</strong>, ${data['location']['state']}`);
-			Array.from(document.getElementById("weatherWidget").getElementsByClassName("weather-humidity")).forEach(e => e.innerHTML=`${data['atmosphere']['humidity']}`);
-			Array.from(document.getElementById("weatherWidget").getElementsByClassName("weather-temp")).forEach(e => e.innerHTML=`${data['current']['temp']}`);
-			Array.from(document.getElementById("weatherWidget").getElementsByClassName("weather-tomorrow")).forEach(e => e.src=`http://us.yimg.com/i/us/nws/weather/gr/${data['tomorrow']['code']}ds.png`);
-			Array.from(document.getElementById("weatherWidget").getElementsByClassName("weather-dayaftertomorrow")).forEach(e => e.src = `http://us.yimg.com/i/us/nws/weather/gr/${data['dayafter']['code']}ds.png`);
-		}
-	};
-	xhttp.open("GET", "https://classes.engineering.wustl.edu/cse330/content/weather_json.php", true);
-	xhttp.send();
-}
-
-document.addEventListener("DOMContentLoaded", fetchWeather, false);
-document.getElementById("refresh").addEventListener("click", fetchWeather);
-
-</script>
