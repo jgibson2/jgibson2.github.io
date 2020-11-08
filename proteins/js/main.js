@@ -108,6 +108,7 @@ class ARPDBRenderer {
 	    // render the scene
             this.onRenderFcts.push(function(){
                 ar.renderer.render( ar.scene, ar.camera );
+		ar.resize();
             });
         }
 
@@ -124,6 +125,7 @@ class ARPDBRenderer {
             });
             this.onRenderFcts.push(function(){
                 ar.renderer.render( ar.scene, ar.camera );
+	    	ar.resize();
             });
         }
 
@@ -182,7 +184,6 @@ class ARPDBRenderer {
                 ar.onRenderFcts.forEach(function(onRenderFct){
                     onRenderFct(deltaMsec/1000, nowMsec/1000)
                 });
-		ar.arToolkitSource.onResizeElement();
             });
         }
 
@@ -222,7 +223,6 @@ class ARPDBRenderer {
         }
 
     resize() {
-	console.log("Resized");
         this.arToolkitSource.onResizeElement();
         this.arToolkitSource.copyElementSizeTo(this.renderer.domElement)
         if( this.arToolkitContext.arController != null ){
