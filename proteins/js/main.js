@@ -17,7 +17,7 @@ class ARPDBRenderer {
             let w = window.innerWidth;
             let h = window.innerHeight;
             this.renderer.setClearColor(new THREE.Color('lightgrey'), 0)
-            this.renderer.setSize(480, 640);
+            this.renderer.setSize(w, h);
             this.renderer.domElement.style.position = 'absolute'
             this.renderer.domElement.style.top = '0px'
             this.renderer.domElement.style.left = '0px'
@@ -43,8 +43,8 @@ class ARPDBRenderer {
             this.arToolkitSource = new THREEx.ArToolkitSource({
                 // to read from the webcam
                 sourceType : 'webcam',
-		sourceWidth: this.renderer.getSize().y,
-		sourceHeight: this.renderer.getSize().x,
+		//sourceWidth: this.renderer.getSize().y,
+		//sourceHeight: this.renderer.getSize().x,
                 displayWidth: this.renderer.getSize().y,
                 displayHeight: this.renderer.getSize().x
             })
@@ -61,8 +61,8 @@ class ARPDBRenderer {
             this.arToolkitContext = new THREEx.ArToolkitContext({
                 cameraParametersUrl: THREEx.ArToolkitContext.baseURL + '../data/data/camera_para.dat',
                 detectionMode: 'mono',
-                canvasHeight: this.renderer.getSize().x,
-                canvasWidth: this.renderer.getSize().y
+                canvasHeight: ar.renderer.getSize().x,
+                canvasWidth: ar.renderer.getSize().y
             })
             // initialize it
             this.arToolkitContext.init(function onCompleted(){
@@ -169,7 +169,9 @@ class ARPDBRenderer {
 
             // run the rendering loop
             var lastTimeMsec = null;
+
             requestAnimationFrame(function animate(nowMsec){
+		// ar.arToolkitSource.onResizeElement();
                 // keep looping
                 requestAnimationFrame( animate );
                 // measure time
@@ -180,6 +182,7 @@ class ARPDBRenderer {
                 ar.onRenderFcts.forEach(function(onRenderFct){
                     onRenderFct(deltaMsec/1000, nowMsec/1000)
                 });
+		ar.arToolkitSource.onResizeElement();
             });
         }
 
@@ -219,9 +222,10 @@ class ARPDBRenderer {
         }
 
     resize() {
+	console.log("Resized");
         this.arToolkitSource.onResizeElement();
         this.arToolkitSource.copyElementSizeTo(this.renderer.domElement)
-        if( this.arToolkitContext.arController !== null ){
+        if( this.arToolkitContext.arController != null ){
             this.arToolkitSource.copyElementSizeTo(this.arToolkitContext.arController.canvas)
         }
     }

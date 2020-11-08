@@ -59,16 +59,16 @@
 <script type="module">
 import { ARPDBRenderer } from './js/main.js' 
 var ar = null;
-$(window).on("load", function(){
+$(window).ready(function(){
+	document.getElementById("myNav").style.width = "0%";
         let url_string = window.location.href 
         let url = new URL(url_string);
         let id = url.searchParams.get("id");
         let repr = url.searchParams.get("repr");
-        console.log(id);
         if(id === null) {
             id = 'pdb:1BBY'
         }
-        console.log(repr);
+	document.getElementById("pdb_id").value = id;
         if(repr === null) {
             repr = {representation: "cartoon"}
         }
@@ -81,6 +81,7 @@ $(window).on("load", function(){
     	});
         ar.clearThree();
         ar.makeScene(id, repr);
+	ar.resize();
         let dl = url.searchParams.get("dl");
         if(dl === "1") {
                 ar.downloadGLTF();
@@ -110,6 +111,7 @@ function closeNav() {
         {scale: document.getElementById("scale").value,
         aaScale: document.getElementById("aaScale").value,
         representation: document.getElementById("representation").value});
+    ar.resize();
 }
 </script>
 </body>
