@@ -48,9 +48,9 @@ h6 {text-align: center;}
           <select class="form-control" id="acFn">
             <option selected value="EI">Expected Improvement</option>
             <option value="KG">Knowledge Gradient</option>
-            <option value="UCB01">Upper Confidence Bound (&beta;=0.01)</option>
-            <option value="UCB5">Upper Confidence Bound (&beta;=0.5)</option>
-            <option value="UCB99">Upper Confidence Bound (&beta;=0.99)</option>
+            <option value="UCBp1">Upper Confidence Bound (&beta;=0.1)</option>
+            <option value="UCB1">Upper Confidence Bound (&beta;=1.0)</option>
+            <option value="UCB3">Upper Confidence Bound (&beta;=3.0)</option>
           </select>
 	  <div>
 	    <label for="sigma">Sigma</label>
@@ -86,9 +86,9 @@ h6 {text-align: center;}
 	var acquisitionFnMap = {
 		EI: ExpectedImprovement,
 		KG: KnowledgeGradient,
-		UCB01: (gp,x) => UpperConfidenceBound(gp, x, 0.01),
-		UCB5: (gp,x) => UpperConfidenceBound(gp, x, 0.5),
-		UCB99: (gp,x) => UpperConfidenceBound(gp, x, 0.99),
+		UCBp1: (gp,x) => UpperConfidenceBound(gp, x, 0.1),
+		UCB1: (gp,x) => UpperConfidenceBound(gp, x, 1.0),
+		UCB3: (gp,x) => UpperConfidenceBound(gp, x, 3.0),
 	};
 	
 	var sigma = parseFloat($('#sigma').val()) + 1e-5;
