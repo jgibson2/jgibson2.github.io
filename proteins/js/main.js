@@ -43,8 +43,8 @@ class ARPDBRenderer {
             this.arToolkitSource = new THREEx.ArToolkitSource({
                 // to read from the webcam
                 sourceType : 'webcam',
-		//sourceWidth: this.renderer.getSize().y,
-		//sourceHeight: this.renderer.getSize().x,
+		sourceWidth: this.renderer.getSize().y,
+		sourceHeight: this.renderer.getSize().x,
                 displayWidth: this.renderer.getSize().y,
                 displayHeight: this.renderer.getSize().x
             })
