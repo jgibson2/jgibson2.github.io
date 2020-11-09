@@ -18,10 +18,10 @@ function plotGP(gp, X, acquisitionFunction=null, plotAcquisitionFn=false, elem='
 		line : { color: color }
 	};
 	let data = [trace1, trace2];
+	let tXdata = [];
+	let tYdata = [];
 	if(gp.xData && gp.yData) {
-		let tXdata = [];
 		math.map(gp.xData, e => tXdata.push(e));
-		let tYdata = [];
 		math.map(gp.yData, e => tYdata.push(e));
 		data.push({
 			x: tXdata,
@@ -33,7 +33,8 @@ function plotGP(gp, X, acquisitionFunction=null, plotAcquisitionFn=false, elem='
 	}
 	if(acquisitionFunction) {
 		let EI = acquisitionFunction(gp, X);
-		let xMax = Xdata[Xdata.length / 2 | 0], yMax = pred.mean[pred.mean.length / 2 | 0]; eiMax = Number.NEGATIVE_INFINITY;
+		i = pred.mean.indexOf(Math.max(...pred.mean));
+		let xMax = Xdata[i], yMax = pred.mean[i]; eiMax = EI[i];
 		EI.map((e, i) => {
 			if(e > eiMax) {
 				eiMax = e; xMax = Xdata[i]; yMax = pred.mean[i];
