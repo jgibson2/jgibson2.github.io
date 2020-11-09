@@ -48,9 +48,7 @@ h6 {text-align: center;}
           <select class="form-control" id="acFn">
             <option selected value="EI">Expected Improvement</option>
             <option value="KG">Knowledge Gradient</option>
-            <option value="UCBp1">Upper Confidence Bound (&beta;=0.1)</option>
-            <option value="UCB1">Upper Confidence Bound (&beta;=1.0)</option>
-            <option value="UCB3">Upper Confidence Bound (&beta;=3.0)</option>
+            <option value="UCB">Upper Confidence Bound</option>
           </select>
 	  <div>
 	    <label for="sigma">Sigma</label>
@@ -83,12 +81,12 @@ h6 {text-align: center;}
 		RQ1: RQ,
 		RQ5: (x, x2) => RQ(x, x2, 5.0)
 	};
+
+	var iterations = 0;
 	var acquisitionFnMap = {
 		EI: ExpectedImprovement,
 		KG: KnowledgeGradient,
-		UCBp1: (gp,x) => UpperConfidenceBound(gp, x, 0.1),
-		UCB1: (gp,x) => UpperConfidenceBound(gp, x, 1.0),
-		UCB3: (gp,x) => UpperConfidenceBound(gp, x, 3.0),
+		UCB: (gp,x) => UpperConfidenceBound(gp, x, 2.0 * math.log((iterations+4)**2 * 3.141592654**2 / 60.0)),
 	};
 	
 	var sigma = parseFloat($('#sigma').val()) + 1e-5;
@@ -111,6 +109,7 @@ h6 {text-align: center;}
 		tY = tY.concat(xs.map(n => f.evaluate({x : n}) + sampleGaussian(0.0, sigma)));
 		gp.xData = math.matrix(tX);
 		gp.yData = math.matrix(tY);
+		iterations++;
 		plotGP(gp, X, acFn, true, elem='gp');
 	});
 	chart.on('plotly_relayout', ev => {
@@ -124,6 +123,7 @@ h6 {text-align: center;}
 		tX = []; tY = [];
 		kern = kernelMap[$('#kernel').find("option:selected").val()];
 		acFn = acquisitionFnMap[$('#acFn').find("option:selected").val()];
+		iterations = 0;
 		sigma = parseFloat($('#sigma').val()) + 1e-5;
 		f = math.compile($('#function').val());
 		lx = -1.0;

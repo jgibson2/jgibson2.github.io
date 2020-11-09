@@ -163,8 +163,8 @@ function KnowledgeGradient(gp, X, eta=0.01) {
 	}
 }
 
-function UpperConfidenceBound(gp, X, beta=0.5) {
+function UpperConfidenceBound(gp, X, beta=2.0) {
 	let predX = predict(gp, X);
-	let UCB = math.add(predX.mean, math.dotMultiply(math.sqrt(beta), predX.std));
+	let UCB = math.add(predX.mean, math.dotMultiply(beta, predX.std));
 	return UCB;	
 }
