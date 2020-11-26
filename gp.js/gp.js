@@ -168,3 +168,15 @@ function UpperConfidenceBound(gp, X, beta=2.0) {
 	let UCB = math.add(predX.mean, math.dotMultiply(beta, predX.std));
 	return UCB;	
 }
+
+function ProbabilityOfImprovement(gp, X, alpha=0.1) {
+	let bestY = math.max(gp.yData);
+	let i = [...Array(gp.yData.size()[0]).keys()].filter(y => bestY == math.subset(gp.yData, math.index(y)))[0];
+	let bestPhi = predict(gp, [math.subset(gp.xData, math.index(i))]).mean[0];
+	let range = math.max(gp.yData) - math.min(gp.yData);
+	let tau = (alpha * range) + bestPhi;
+	let predX = predict(gp, X);
+	let Z = math.dotDivide(math.subtract(predX.mean, tau), math.add(predX.std, 1e-8));
+	let poi = Z.map(z => gaussianCDF(z));
+	return poi;
+}

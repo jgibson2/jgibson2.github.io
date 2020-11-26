@@ -49,11 +49,12 @@ h6 {text-align: center;}
             <option selected value="EI">Expected Improvement</option>
             <option value="KG">Knowledge Gradient</option>
             <option value="UCB">Upper Confidence Bound</option>
+            <option value="PoI">Probability of Improvement (&alpha;=0.1)</option>
           </select>
 	  <div>
 	    <label for="sigma">Sigma</label>
 	    <div>
-	      <input type="range" class="custom-range w-75" min=0.0 max=2.0 id="sigma" step=0.01 value=0.0>
+	      <input type="range" class="custom-range w-75" min=0.0 max=1.0 id="sigma" step=0.01 value=0.0>
 	      <span class="font-weight-bold text-primary ml-2 valueSpan2"></span>
 	    </div>
 	  </div>
@@ -86,7 +87,8 @@ h6 {text-align: center;}
 	var acquisitionFnMap = {
 		EI: ExpectedImprovement,
 		KG: KnowledgeGradient,
-		UCB: (gp,x) => UpperConfidenceBound(gp, x, 2.0 * math.log((iterations+4)**2 * 3.141592654**2 / 60.0)),
+		UCB: (gp,x) => UpperConfidenceBound(gp, x, 0.4 * math.log((iterations+4)**2 * 3.141592654**2 / 60.0)),
+		PoI: ProbabilityOfImprovement
 	};
 	
 	var sigma = parseFloat($('#sigma').val()) + 1e-5;
