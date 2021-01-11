@@ -44,10 +44,10 @@ class ARPDBRenderer {
         this.arToolkitSource = new THREEx.ArToolkitSource({
             // to read from the webcam
             sourceType: 'webcam',
-            sourceWidth: this.renderer.getSize().x,
-            sourceHeight: this.renderer.getSize().y,
-            displayWidth: this.renderer.getSize().x,
-            displayHeight: this.renderer.getSize().y
+            sourceWidth: this.renderer.getSize().y,
+            sourceHeight: this.renderer.getSize().x,
+            displayWidth: this.renderer.getSize().y,
+            displayHeight: this.renderer.getSize().x
         })
 
 
@@ -62,8 +62,8 @@ class ARPDBRenderer {
         this.arToolkitContext = new THREEx.ArToolkitContext({
             cameraParametersUrl: THREEx.ArToolkitContext.baseURL + '../data/data/camera_para.dat',
             detectionMode: 'mono',
-            canvasHeight: ar.renderer.getSize().y,
-            canvasWidth: ar.renderer.getSize().x
+            canvasHeight: ar.renderer.getSize().x,
+            canvasWidth: ar.renderer.getSize().y
         })
         // initialize it
         this.arToolkitContext.init(function onCompleted() {
