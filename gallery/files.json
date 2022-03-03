@@ -1,0 +1,92 @@
+[
+  {
+    "title": "Ghoti",
+    "src": "./photos/fish.jpg",
+    "srct": "./photos/fish.thumb.jpg"
+  },
+  {
+    "title": "Haserot Angel",
+    "src": "./photos/angel.jpg",
+    "srct": "./photos/angel.thumb.jpg"
+  },
+  {
+    "title": "Bathtime",
+    "src": "./photos/bathtime.jpg",
+    "srct": "./photos/bathtime.thumb.jpg"
+  },
+  {
+    "title": "The Awakened Beast",
+    "src": "./photos/beast.jpg",
+    "srct": "./photos/beast.thumb.jpg"
+  },
+  {
+    "title": "Breakwall",
+    "src": "./photos/breakwall.jpg",
+    "srct": "./photos/breakwall.thumb.jpg"
+  },
+  {
+    "title": "Bridge Over Dry Creek",
+    "src": "./photos/bridge.jpg",
+    "srct": "./photos/bridge.thumb.jpg"
+  },
+  {
+    "title": "Colors Of Industry",
+    "src": "./photos/colors_of_industry.jpg",
+    "srct": "./photos/colors_of_industry.thumb.jpg"
+  },
+  {
+    "title": "Diamond Ring",
+    "src": "./photos/diamond_ring.jpg",
+    "srct": "./photos/diamond_ring.thumb.jpg"
+  },
+  {
+    "title": "Emergence",
+    "src": "./photos/emergence.jpg",
+    "srct": "./photos/emergence.thumb.jpg"
+  },
+  {
+    "title": "Envy",
+    "src": "./photos/envy.jpg",
+    "srct": "./photos/envy.thumb.jpg"
+  },
+  {
+    "title": "Flower Heart",
+    "src": "./photos/flower_heart.jpg",
+    "srct": "./photos/flower_heart.thumb.jpg"
+  },
+  {
+    "title": "Fortress",
+    "src": "./photos/fortress.jpg",
+    "srct": "./photos/fortress.thumb.jpg"
+  },
+  {
+    "title": "Liftoff",
+    "src": "./photos/liftoff.png",
+    "srct": "./photos/liftoff.thumb.jpg"
+  },
+  {
+    "title": "Dunerise",
+    "src": "./photos/sunrise_over_dunes.jpg",
+    "srct": "./photos/sunrise_over_dunes.thumb.jpg"
+  },
+  {
+    "title": "Robot Wars",
+    "src": "./photos/robot.jpg",
+    "srct": "./photos/robot.thumb.jpg"
+  },
+  {
+    "title": "Tumult",
+    "src": "./photos/tumult.jpg",
+    "srct": "./photos/tumult.thumb.jpg"
+  },
+  {
+    "title": "\"WTF\"",
+    "src": "./photos/wtf.jpg",
+    "srct": "./photos/wtf.thumb.jpg"
+  },
+  {
+    "title": "Yellowstone Bison",
+    "src": "./photos/yellowstone_bison.png",
+    "srct": "./photos/yellowstone_bison.thumb.jpg"
+  }
+]
