@@ -1,9 +1,9 @@
-import * as wasm from "wasm-demo";
+import * as wasm from "wasm-demo"
 
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 const coords = wasm.plant_2d(5);
-ctx.canvas.width  = window.innerWidth * 0.9;
+ctx.canvas.width = window.innerWidth * 0.9;
 ctx.canvas.height = window.innerHeight * 0.9;
 
 // draw background and floor
@@ -40,10 +40,10 @@ let drawCallback = setInterval(() => {
         clearInterval(drawCallback);
         return;
     }
-    let start_x = coords[i  ] + x_offset;
-    let start_y = coords[i+1] + y_offset;
-    let end_x   = coords[i+2] + x_offset;
-    let end_y   = coords[i+3] + y_offset;
+    let start_x = coords[i] + x_offset;
+    let start_y = coords[i + 1] + y_offset;
+    let end_x = coords[i + 2] + x_offset;
+    let end_y = coords[i + 3] + y_offset;
     // flip 90 degrees
     ctx.moveTo(start_x, start_y);
     ctx.lineTo(end_x, end_y);
@@ -52,4 +52,6 @@ let drawCallback = setInterval(() => {
 }, delayMs);
 ctx.closePath();
 
-console.log(coords);
+// console.log(coords);
+
+
