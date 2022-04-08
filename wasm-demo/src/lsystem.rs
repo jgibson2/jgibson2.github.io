@@ -1,5 +1,4 @@
 use std::collections::HashMap;
-use std::f64::consts::PI;
 use std::hash::Hash;
 use rand::prelude::*;
 
@@ -69,10 +68,10 @@ pub trait LRules<T> {
 }
 
 pub struct MapRules<T: Hash + Eq> {
-    productions: HashMap<T, (Vec<T>, f64)>,
+    productions: HashMap<T, Vec<(Vec<T>, f64)>>,
 }
 
-impl<T> MapRules<T> where T: Hash + Eq {
+impl<T> MapRules<T> where T: Hash + Eq + Clone {
     /// Create a new, empty ruleset.
     pub fn new() -> MapRules<T> {
         MapRules {
@@ -87,10 +86,15 @@ impl<T> MapRules<T> where T: Hash + Eq {
 
     /// Set an atom to produce a vector with probability p
     pub fn set_prob(&mut self, k: T, v: Vec<T>, p: f64) -> Option<Vec<T>> {
-        let ret = self.productions.insert(k, (v, p));
-        match ret {
-            Some((v, _p)) => Some(v),
-            None => None
+        if !self.productions.contains_key(&k) {
+            self.productions.insert(k.clone(), Vec::<(Vec<T>, f64)>::new());
+        }
+        let vec = self.productions.get_mut(&k).unwrap();
+        vec.push((v.clone(), p.clone()));
+        if vec.len() == 1 {
+            Some(v)
+        } else {
+            None
         }
     }
 }
@@ -118,13 +122,14 @@ impl MapRules<char> {
 impl<T: ?Sized> LRules<T> for MapRules<T> where T: Clone + Hash + Eq {
     fn map(&self, input: &T) -> Option<Vec<T>> {
         match self.productions.get(input) {
-            Some((v, p)) => {
-                if random::<f64>() <= *p {
-                    Some(v.clone())
-                } else {
-                    Some(vec![input.clone()])
+            Some(prods) => {
+                for (v, p) in prods.iter() {
+                    if random::<f64>() <= *p {
+                        return Some(v.clone());
+                    }
                 }
-            }
+                return Some(vec![input.clone()])
+            },
             None => None,
         }
     }
@@ -353,8 +358,8 @@ impl Turtle for Turtle3D {
 pub trait LineDrawer<
     T,
     TT> where TT: Turtle {
-    /// perform a mapping of atoms to lines
-    fn map(&self, input: &Vec<T>, turtle: &mut TT) -> Vec<TT::Line>;
+    /// perform a mapping of atoms to lines and markers
+    fn map(&self, input: &Vec<T>, turtle: &mut TT) -> (Vec<TT::Line>, Vec<TT::Position>);
 
     fn get_move_distance(&self) -> f64;
 
@@ -380,9 +385,10 @@ pub struct PlantDrawer3D<TT>
 
 impl<TT> LineDrawer<char, TT> for PlantDrawer2D<TT>
     where TT: Turtle<Line=Line2D, Bearing=Bearing2D, Position=Position2D> {
-    fn map(&self, input: &Vec<char>, turtle: &mut TT) -> Vec<TT::Line>
+    fn map(&self, input: &Vec<char>, turtle: &mut TT) -> (Vec<TT::Line>, Vec<TT::Position>)
     {
         let mut lines = Vec::<TT::Line>::new();
+        let mut markers = Vec::<TT::Position>::new();
         for s in input.iter() {
             match s {
                 'F' => {
@@ -398,10 +404,13 @@ impl<TT> LineDrawer<char, TT> for PlantDrawer2D<TT>
                 '+' => turtle.turn(&self.get_move_bearing()),
                 '[' => turtle.push(),
                 ']' => turtle.pop(),
+                'M' => {
+                    markers.push(turtle.position().clone());
+                },
                 _ => {}
             }
         }
-        return lines;
+        return (lines, markers);
     }
 
     fn get_move_distance(&self) -> f64 {
@@ -415,8 +424,9 @@ impl<TT> LineDrawer<char, TT> for PlantDrawer2D<TT>
 
 impl<TT> LineDrawer<char, TT> for PlantDrawer3D<TT>
     where TT: Turtle<Line=Line3D, Bearing=Bearing3D, Position=Position3D> {
-    fn map(&self, input: &Vec<char>, turtle: &mut TT) -> Vec<TT::Line> {
+    fn map(&self, input: &Vec<char>, turtle: &mut TT) -> (Vec<TT::Line>, Vec<TT::Position>) {
         let mut lines = Vec::<TT::Line>::new();
+        let mut markers = Vec::<TT::Position>::new();
         for s in input.iter() {
             match s {
                 'F' => {
@@ -432,10 +442,13 @@ impl<TT> LineDrawer<char, TT> for PlantDrawer3D<TT>
                 '+' => turtle.turn(&self.get_move_bearing()),
                 '[' => turtle.push(),
                 ']' => turtle.pop(),
+                'M' => {
+                    markers.push(turtle.position().clone());
+                },
                 _ => {}
             }
         }
-        return lines;
+        return (lines, markers);
     }
 
     fn get_move_distance(&self) -> f64 {
