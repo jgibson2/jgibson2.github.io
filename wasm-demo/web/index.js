@@ -6,7 +6,7 @@ async function run() {
     let canvas = document.getElementById('canvas');
     canvas.width = window.innerWidth * 0.9;
     canvas.height = window.innerHeight * 0.9;
-    plant_2d(5, "element");
+    plant_2d(5, "canvas");
 }
 
 run();
